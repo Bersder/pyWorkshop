@@ -2,9 +2,7 @@ from apis.NCMapi import *
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from utils.paUtil import down_file
 import json
-headers = {
-    'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36'
-}
+import re
 
 
 def down_lrc(id_, path):
@@ -58,6 +56,8 @@ def gen_mj_from_ids(ids):
             }
             if lrc_mask_list[i]:
                 tmp_jd['lrc'] = '/music/' + lrc_path_list[i]
+            else:
+                tmp_jd['lrc'] = '/music/lrcs/__empty__.lrc'
             json_data.append(tmp_jd)
 
         with open('music.json', 'w', encoding='utf-8') as mj:
@@ -78,7 +78,7 @@ def gen_mj_from_rank(uid, weekly=True, limit=100):
         song_pic_list = []
         song_url_list = []
         for each in rank_data:
-            song_name_list.append(each['song']['name'])
+            song_name_list.append(re.sub(r'[/?]', ' ', each['song']['name']))
             song_id_list.append(each['song']['id'])
             song_author_list.append('/'.join([i['name'] for i in each['song']['ar']]))
             song_pic_list.append(each['song']['al']['picUrl'])
@@ -117,6 +117,8 @@ def gen_mj_from_rank(uid, weekly=True, limit=100):
             }
             if lrc_mask_list[i]:
                 tmp_jd['lrc'] = '/music/' + lrc_path_list[i]
+            else:
+                tmp_jd['lrc'] = '/music/lrcs/__empty__.lrc'
             json_data.append(tmp_jd)
 
         with open('music.json', 'w', encoding='utf-8') as mj:
@@ -124,4 +126,8 @@ def gen_mj_from_rank(uid, weekly=True, limit=100):
         print("数据生成完成!")
     else:
         print('\033[1;31;40m排行数据获取失败,用户不存在/屏蔽\033[0m')
-# gen_mj_from_rank(93044810, True, 1)
+
+
+with open('./lrcs/__empty__.lrc', 'w', encoding='utf-8') as empty:
+    empty.writelines("[00:00.00]纯音乐——请欣赏\n[00:20.00]")
+# gen_mj_from_rank(93044810, False, 100)

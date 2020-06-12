@@ -48,7 +48,7 @@ class Bangumi:
         :param order: rate/date/title
         :return:
         """
-        r = requests.get('http://bangumi.tv/anime/list/%s/do' % self.username, params={'orderby': order}, headers=self.headers)
+        r = requests.get('https://bangumi.tv/anime/list/%s/do' % self.username, params={'orderby': order}, headers=self.headers)
         r.encoding = 'utf-8'
         return self.__anime_extract(r.text)
 
@@ -58,7 +58,7 @@ class Bangumi:
         :param order: 同上
         :return:
         """
-        r = requests.get('http://bangumi.tv/anime/list/%s/collect' % self.username, params={'orderby': order}, headers=self.headers)
+        r = requests.get('https://bangumi.tv/anime/list/%s/collect' % self.username, params={'orderby': order}, headers=self.headers)
         r.encoding = 'utf-8'
         return self.__anime_extract(r.text)
 
@@ -68,7 +68,7 @@ class Bangumi:
         :param order: 同上
         :return:
         """
-        r = requests.get('http://bangumi.tv/anime/list/%s/wish' % self.username, params={'orderby': order}, headers=self.headers)
+        r = requests.get('https://bangumi.tv/anime/list/%s/wish' % self.username, params={'orderby': order}, headers=self.headers)
         r.encoding = 'utf-8'
         return self.__anime_extract(r.text)
 
@@ -85,7 +85,7 @@ class Bangumi:
             anime = dict()
             anime['id'] = each['id'].split('_')[-1]
             anime['link'] = 'https://bangumi.tv' + each.a['href']
-            anime['imgSrc'] = 'https:' + each.a.span.img['src'].replace('/s/', '/c/')
+            anime['imgSrc'] = 'https:' + each.a.span.img['src'].replace('/s/', '/l/')
             anime['nameCN'] = each.div.h3.a.string
             anime['name'] = each.div.h3.small.string
 
@@ -101,7 +101,7 @@ class Bangumi:
             anime['at'] = each.div.find('span', class_='tip_j').string  # 加入时间
 
             comment_node = each.div.find('div', class_='text_main_even')  # 吐嘈评价
-            anime['comment'] = comment_node.div.string if comment_node else ''
+            anime['comment'] = comment_node.div.string if comment_node else None
 
             animes.append(anime)
         return animes
