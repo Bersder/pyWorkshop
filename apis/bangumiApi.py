@@ -42,15 +42,28 @@ class Bangumi:
         data = json.loads(r.text)
         return data if data else []
 
+    def get_page_num(self, cat='do'):
+        url = 'https://bangumi.tv/anime/list/%s/%s' % (self.username, cat)
+        r = requests.get(url, headers=self.headers)
+        r.encoding = 'utf-8'
+        soup = BeautifulSoup(r.text, 'lxml')
+        page_links = soup.find('div', id='multipage').find_all('a')
+        page_num = int(page_links[-2].string) if len(page_links) else 1
+        return page_num
+
     def anime_watching(self, order=''):
         """
         获取正在观看的番(不含进度)
         :param order: rate/date/title
         :return:
         """
-        r = requests.get('https://bangumi.tv/anime/list/%s/do' % self.username, params={'orderby': order}, headers=self.headers)
-        r.encoding = 'utf-8'
-        return self.__anime_extract(r.text)
+        page_num = self.get_page_num()
+        res = []
+        for i in range(1, page_num+1):
+            r = requests.get('https://bangumi.tv/anime/list/%s/do?page=%s' % (self.username, str(i)), params={'orderby': order}, headers=self.headers)
+            r.encoding = 'utf-8'
+            res.extend(self.__anime_extract(r.text))
+        return res
 
     def anime_watched(self, order=''):
         """
@@ -58,9 +71,13 @@ class Bangumi:
         :param order: 同上
         :return:
         """
-        r = requests.get('https://bangumi.tv/anime/list/%s/collect' % self.username, params={'orderby': order}, headers=self.headers)
-        r.encoding = 'utf-8'
-        return self.__anime_extract(r.text)
+        page_num = self.get_page_num('collect')
+        res = []
+        for i in range(1, page_num+1):
+            r = requests.get('https://bangumi.tv/anime/list/%s/collect?page=%s' % (self.username, str(i)), params={'orderby': order}, headers=self.headers)
+            r.encoding = 'utf-8'
+            res.extend(self.__anime_extract(r.text))
+        return res
 
     def anime_wish(self, order=''):
         """
@@ -68,9 +85,13 @@ class Bangumi:
         :param order: 同上
         :return:
         """
-        r = requests.get('https://bangumi.tv/anime/list/%s/wish' % self.username, params={'orderby': order}, headers=self.headers)
-        r.encoding = 'utf-8'
-        return self.__anime_extract(r.text)
+        page_num = self.get_page_num('wish')
+        res = []
+        for i in range(1, page_num+1):
+            r = requests.get('https://bangumi.tv/anime/list/%s/wish?page=%s' % (self.username, str(i)), params={'orderby': order}, headers=self.headers)
+            r.encoding = 'utf-8'
+            res.extend(self.__anime_extract(r.text))
+        return res
 
     @staticmethod
     def __anime_extract(html):
@@ -87,7 +108,7 @@ class Bangumi:
             anime['link'] = 'https://bangumi.tv' + each.a['href']
             anime['imgSrc'] = 'https:' + each.a.span.img['src'].replace('/s/', '/l/')
             anime['nameCN'] = each.div.h3.a.string
-            anime['name'] = each.div.h3.small.string
+            anime['name'] = each.div.h3.small.string if each.div.h3.small else anime['nameCN']
 
             # tmp = each.div.p.string.split('/')
             # anime['epNum'] = int(tmp[0].strip()[:-1])
