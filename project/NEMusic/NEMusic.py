@@ -3,6 +3,7 @@ from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from utils.paUtil import down_file
 import json
 import re
+import os
 
 
 def down_lrc(id_, path):
@@ -128,6 +129,13 @@ def gen_mj_from_rank(uid, weekly=True, limit=100):
         print('\033[1;31;40m排行数据获取失败,用户不存在/屏蔽\033[0m')
 
 
-with open('./lrcs/__empty__.lrc', 'w', encoding='utf-8') as empty:
-    empty.writelines("[00:00.00]纯音乐——请欣赏\n[00:20.00]")
-# gen_mj_from_rank(93044810, False, 100)
+if __name__ == '__main__':
+    if not os.path.exists('./lrcs'):
+        os.mkdir('./lrcs')
+    if not os.path.exists('./covers'):
+        os.mkdir('./covers')
+    if not os.path.exists('./songs'):
+        os.mkdir('./songs')
+    with open('./lrcs/__empty__.lrc', 'w', encoding='utf-8') as empty:
+        empty.writelines("[00:00.00]纯音乐——请欣赏\n[00:20.00]")
+    # gen_mj_from_rank(93044810, False, 100)

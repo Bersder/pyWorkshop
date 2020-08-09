@@ -1,7 +1,7 @@
 import sys
 
 
-class CONST:
+class Const:
     class ConstError(PermissionError):
         pass
 
@@ -16,4 +16,4 @@ class CONST:
         self.__dict__[name] = value
 
 
-sys.modules[__name__] = CONST()
+sys.modules[__name__] = Const()
